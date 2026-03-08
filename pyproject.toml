@@ -16,8 +16,8 @@ dependencies = [
     "schedule>=1.2",
 ]
 
-[tool.setuptools.packages.find]
-include = ["hunter*"]
+[tool.setuptools]
+packages = ["hunter", "hunter.x_theme_generator"]
 
 [project.scripts]
 hunter = "hunter.main:cli"
