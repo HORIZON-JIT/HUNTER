@@ -73,7 +73,29 @@ def generate_tweets(
             end = raw_text.index("```", start)
             raw_text = raw_text[start:end].strip()
 
-        drafts_data = json.loads(raw_text)
+        try:
+            drafts_data = json.loads(raw_text)
+        except json.JSONDecodeError:
+            logger.warning("JSON解析失敗、再試行中: %s", theme.title)
+            response = client.messages.create(
+                model=CLAUDE_MODEL,
+                max_tokens=2048,
+                system=system_prompt + "\n\n必ず有効なJSONのみを出力してください。説明文は不要です。",
+                messages=[{"role": "user", "content": user_message}],
+            )
+            raw_text = response.content[0].text.strip()
+            if "```" in raw_text:
+                start = raw_text.index("```") + 3
+                if raw_text[start:].startswith("json"):
+                    start += 4
+                end = raw_text.index("```", start)
+                raw_text = raw_text[start:end].strip()
+            try:
+                drafts_data = json.loads(raw_text)
+            except json.JSONDecodeError:
+                logger.error("再試行でもJSON解析失敗、スキップ: %s", theme.title)
+                continue
+
         drafts = []
         for item in drafts_data:
             text = item["tweet"]
