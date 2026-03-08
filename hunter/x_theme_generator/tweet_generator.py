@@ -10,23 +10,19 @@ from hunter.x_theme_generator.models import Theme, TweetDraft, ThemeTweets
 logger = logging.getLogger(__name__)
 
 BUZZ_FORMATS = [
-    "speed_alert",
-    "comparison",
-    "secret_reveal",
-    "before_after",
-    "list_thread",
-    "problem_solution",
-    "question_claim_evidence",
+    "field_report",
+    "surprising_fact",
+    "contrarian",
+    "quick_tip",
+    "news_insight",
 ]
 
 FORMAT_LABELS = {
-    "speed_alert": "速報アラート型",
-    "comparison": "比較煽り型",
-    "secret_reveal": "秘密公開型",
-    "before_after": "ビフォーアフター数字型",
-    "list_thread": "リスト×スレッド型",
-    "problem_solution": "問題→解決型",
-    "question_claim_evidence": "質問→主張→証拠型",
+    "field_report": "現場の実験レポート型",
+    "surprising_fact": "意外な発見型",
+    "contrarian": "逆張り・本音型",
+    "quick_tip": "即使えるTips型",
+    "news_insight": "ニュース深掘り型",
 }
 
 
@@ -48,14 +44,23 @@ def generate_tweets(
         selected_formats = random.sample(BUZZ_FORMATS, 2)
         format_names = [FORMAT_LABELS[f] for f in selected_formats]
 
+        articles_hint = ""
+        if theme.key_articles:
+            articles_hint = f"参考記事URL: {', '.join(theme.key_articles)}\n\n"
+
         user_message = (
-            f"以下のテーマについて、指定されたフォーマットで投稿下書きを2本生成してください。\n\n"
+            f"以下のテーマで投稿を2本書いてください。\n\n"
             f"テーマ: {theme.title}\n"
-            f"概要: {theme.summary}\n\n"
-            f"使用するフォーマット:\n"
+            f"面白いポイント: {theme.summary}\n"
+            f"{articles_hint}"
+            f"使用するスタイル:\n"
             f"1. {format_names[0]}（format名: {selected_formats[0]}）\n"
             f"2. {format_names[1]}（format名: {selected_formats[1]}）\n\n"
-            f"各投稿は140〜280文字で生成してください。"
+            f"重要:\n"
+            f"- テンプレをなぞるのではなく、読んだ人が「へぇ」と思う内容にすること\n"
+            f"- 製造業の現場で働く人間のリアルな目線で書くこと\n"
+            f"- 具体的な数字・ツール名・手順を入れること\n"
+            f"- 各投稿は140〜280文字\n"
         )
 
         response = client.messages.create(
