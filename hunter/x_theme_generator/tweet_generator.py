@@ -10,19 +10,21 @@ from hunter.x_theme_generator.models import Theme, TweetDraft, ThemeTweets
 logger = logging.getLogger(__name__)
 
 BUZZ_FORMATS = [
-    "field_report",
-    "surprising_fact",
-    "contrarian",
-    "quick_tip",
-    "news_insight",
+    "before_after",
+    "empathy_betrayal",
+    "provoke_rescue",
+    "number_list",
+    "contrarian_slash",
+    "story",
 ]
 
 FORMAT_LABELS = {
-    "field_report": "現場の実験レポート型",
-    "surprising_fact": "意外な発見型",
-    "contrarian": "逆張り・本音型",
-    "quick_tip": "即使えるTips型",
-    "news_insight": "ニュース深掘り型",
+    "before_after": "Before→After型",
+    "empathy_betrayal": "共感→裏切り型",
+    "provoke_rescue": "煽り→救済型",
+    "number_list": "数字の羅列型",
+    "contrarian_slash": "逆張り一刀両断型",
+    "story": "ストーリー型",
 }
 
 
@@ -49,17 +51,19 @@ def generate_tweets(
             articles_hint = f"参考記事URL: {', '.join(theme.key_articles)}\n\n"
 
         user_message = (
-            f"以下のテーマで投稿を2本書いてください。\n\n"
+            f"以下のテーマでバズる投稿を2本書け。\n\n"
             f"テーマ: {theme.title}\n"
-            f"面白いポイント: {theme.summary}\n"
+            f"切り口: {theme.summary}\n"
             f"{articles_hint}"
             f"使用するスタイル:\n"
             f"1. {format_names[0]}（format名: {selected_formats[0]}）\n"
             f"2. {format_names[1]}（format名: {selected_formats[1]}）\n\n"
-            f"重要:\n"
-            f"- テンプレをなぞるのではなく、読んだ人が「へぇ」と思う内容にすること\n"
-            f"- 製造業の現場で働く人間のリアルな目線で書くこと\n"
-            f"- 具体的な数字・ツール名・手順を入れること\n"
+            f"バズらせるための必須条件:\n"
+            f"- 1行目は15文字以内で「え？」「マジ？」と思わせるフックにしろ\n"
+            f"- 2本の投稿で書き出し・構造・口調を変えろ。同じパターンの繰り返しはNG\n"
+            f"- 具体的な数字（時間、コスト、精度）を最低1つ入れろ\n"
+            f"- 最後の1行で余韻を残せ。「いいね」ではなく「保存」される投稿を書け\n"
+            f"- 製造業の現場を知ってる人間にしか書けないリアルさを入れろ\n"
             f"- 各投稿は140〜280文字\n"
         )
 
