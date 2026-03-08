@@ -19,7 +19,7 @@ RSS_FEEDS = {
     "MIT Technology Review": "https://www.technologyreview.com/feed/",
     "Gigazine": "https://gigazine.net/news/rss_2.0/",
     "OpenAI Blog": "https://openai.com/blog/rss.xml",
-    "ITmedia NEWS テクノロジー": "https://rss.itmedia.co.jp/rss/1.0/news_technology.xml",
+    "The Verge AI": "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
     "CNET Japan": "https://feeds.japan.cnet.com/rss/cnet/all.rdf",
 }
 
