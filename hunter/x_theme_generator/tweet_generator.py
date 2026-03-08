@@ -10,20 +10,20 @@ from hunter.x_theme_generator.models import Theme, TweetDraft, ThemeTweets
 logger = logging.getLogger(__name__)
 
 BUZZ_FORMATS = [
-    "before_after",
-    "empathy_betrayal",
-    "provoke_rescue",
-    "number_list",
-    "contrarian_slash",
+    "shocking_number",
+    "empathy_reversal",
+    "fomo",
+    "list_summary",
+    "honest_confession",
     "story",
 ]
 
 FORMAT_LABELS = {
-    "before_after": "Before→After型",
-    "empathy_betrayal": "共感→裏切り型",
-    "provoke_rescue": "煽り→救済型",
-    "number_list": "数字の羅列型",
-    "contrarian_slash": "逆張り一刀両断型",
+    "shocking_number": "衝撃の数字型",
+    "empathy_reversal": "共感→反転型",
+    "fomo": "知らないと損型",
+    "list_summary": "まとめ・リスト型",
+    "honest_confession": "ぶっちゃけ告白型",
     "story": "ストーリー型",
 }
 
@@ -63,7 +63,8 @@ def generate_tweets(
             f"- 2本の投稿で書き出し・構造・口調を変えろ。同じパターンの繰り返しはNG\n"
             f"- 具体的な数字（時間、コスト、精度）を最低1つ入れろ\n"
             f"- 最後の1行で余韻を残せ。「いいね」ではなく「保存」される投稿を書け\n"
-            f"- 製造業の現場を知ってる人間にしか書けないリアルさを入れろ\n"
+            f"- 普通の会社員（事務職・営業・企画・管理職）が「自分のことだ」と感じるリアルさを入れろ\n"
+            f"- 製造業・工場・生産管理の話は禁止。一般のオフィスワーカーに響く内容にしろ\n"
             f"- 各投稿は140〜280文字\n"
         )
 

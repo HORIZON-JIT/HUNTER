@@ -19,6 +19,8 @@ RSS_FEEDS = {
     "MIT Technology Review": "https://www.technologyreview.com/feed/",
     "Gigazine": "https://gigazine.net/news/rss_2.0/",
     "OpenAI Blog": "https://openai.com/blog/rss.xml",
+    "ITmedia AI+": "https://rss.itmedia.co.jp/rss/2.0/aiplus.xml",
+    "CNET Japan": "https://feeds.japan.cnet.com/rss/cnet/all.rdf",
 }
 
 ARTICLES_MAX_AGE_HOURS = int(os.environ.get("ARTICLES_MAX_AGE_HOURS", "48"))
