@@ -7,7 +7,7 @@ from pathlib import Path
 import requests
 
 from hunter.x_theme_generator.config import (
-    LINE_NOTIFY_TOKEN,
+    DISCORD_WEBHOOK_URL,
     GMAIL_ADDRESS,
     GMAIL_APP_PASSWORD,
     GMAIL_TO,
@@ -63,25 +63,24 @@ def _save_to_file(results: list[ThemeTweets]) -> Path:
     return filepath
 
 
-def notify_line(results: list[ThemeTweets]) -> None:
-    token = LINE_NOTIFY_TOKEN
-    if not token:
-        raise ValueError("LINE_NOTIFY_TOKENが設定されていません")
+def notify_discord(results: list[ThemeTweets]) -> None:
+    url = DISCORD_WEBHOOK_URL
+    if not url:
+        raise ValueError("DISCORD_WEBHOOK_URLが設定されていません")
 
-    message = "\n" + _format_results(results)
-    # LINE Notifyは1000文字制限があるため分割送信
-    chunks = [message[i:i + 999] for i in range(0, len(message), 999)]
+    message = _format_results(results)
+    # Discord Webhookは2000文字制限があるため分割送信
+    chunks = [message[i:i + 1999] for i in range(0, len(message), 1999)]
 
     for chunk in chunks:
         resp = requests.post(
-            "https://notify-api.line.me/api/notify",
-            headers={"Authorization": f"Bearer {token}"},
-            data={"message": chunk},
+            url,
+            json={"content": chunk},
             timeout=30,
         )
         resp.raise_for_status()
 
-    logger.info("LINE Notify送信完了")
+    logger.info("Discord送信完了")
 
 
 def notify_gmail(results: list[ThemeTweets]) -> None:
@@ -106,8 +105,8 @@ def notify(results: list[ThemeTweets], method: str) -> Path:
     filepath = _save_to_file(results)
     logger.info("ファイル保存: %s", filepath)
 
-    if method == "line":
-        notify_line(results)
+    if method == "discord":
+        notify_discord(results)
     elif method == "gmail":
         notify_gmail(results)
     else:

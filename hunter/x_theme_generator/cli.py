@@ -29,7 +29,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--notify",
-        choices=["line", "gmail"],
+        choices=["discord", "gmail"],
         default=None,
         help="通知方法を指定（デフォルト: .envのNOTIFICATION_METHOD）",
     )
