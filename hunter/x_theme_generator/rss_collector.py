@@ -30,7 +30,10 @@ def collect_articles(
 
     for source_name, feed_url in feeds.items():
         try:
-            feed = feedparser.parse(feed_url)
+            feed = feedparser.parse(
+                feed_url,
+                agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            )
             if feed.bozo and not feed.entries:
                 logger.warning("フィード取得失敗: %s (%s)", source_name, feed_url)
                 continue
