@@ -9,7 +9,12 @@ description = "Multi-agent research & analysis system powered by Claude Agent SD
 requires-python = ">=3.10"
 dependencies = [
     "claude-agent-sdk",
+    "anthropic>=0.40.0",
+    "feedparser>=6.0",
+    "python-dotenv>=1.0",
+    "requests>=2.31",
 ]
 
 [project.scripts]
 hunter = "hunter.main:cli"
+hunter-xtheme = "hunter.x_theme_generator.cli:main"
