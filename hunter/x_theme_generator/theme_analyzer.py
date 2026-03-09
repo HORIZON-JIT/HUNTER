@@ -66,6 +66,7 @@ def extract_themes(
             summary=item["summary"],
             key_articles=item.get("key_articles", []),
             relevance_score=item.get("relevance_score", 0),
+            angle=item.get("angle", ""),
         ))
 
     return themes

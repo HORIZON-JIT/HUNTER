@@ -12,6 +12,7 @@ from hunter.x_theme_generator.rss_collector import collect_articles
 from hunter.x_theme_generator.theme_analyzer import extract_themes
 from hunter.x_theme_generator.tweet_generator import generate_tweets, FORMAT_LABELS
 from hunter.x_theme_generator.notifier import notify
+from hunter.x_theme_generator.history import load_recent_tweets, format_history_for_prompt
 
 logging.basicConfig(
     level=logging.INFO,
@@ -50,9 +51,11 @@ def _run_pipeline(notify_method: str, dry_run: bool = False, output_only: bool =
         print("テーマを抽出できませんでした。")
         return
 
-    # Step 3: 投稿下書き生成
+    # Step 3: 過去履歴を読み込み＆投稿下書き生成
     print("✍️  投稿下書きを生成中...")
-    results = generate_tweets(themes, client)
+    past_tweets = load_recent_tweets(days=7)
+    past_tweets_hint = format_history_for_prompt(past_tweets)
+    results = generate_tweets(themes, client, past_tweets_hint=past_tweets_hint)
     total_drafts = sum(len(r.drafts) for r in results)
     print(f"   {total_drafts}本の投稿案を生成\n")
 

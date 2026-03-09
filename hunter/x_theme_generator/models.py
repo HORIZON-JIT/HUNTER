@@ -17,6 +17,7 @@ class Theme:
     summary: str
     key_articles: list[str] = field(default_factory=list)
     relevance_score: int = 0
+    angle: str = ""  # tips, aruaru, contrary
 
 
 @dataclass
