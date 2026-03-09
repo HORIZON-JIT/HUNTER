@@ -1,8 +1,12 @@
 import argparse
 import logging
+import logging.handlers
 import signal
 import sys
 import time
+import traceback
+from datetime import datetime
+from pathlib import Path
 
 import anthropic
 import schedule
@@ -14,12 +18,52 @@ from hunter.x_theme_generator.tweet_generator import generate_tweets, FORMAT_LAB
 from hunter.x_theme_generator.notifier import notify
 from hunter.x_theme_generator.history import load_recent_tweets, format_history_for_prompt
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    datefmt="%H:%M:%S",
-)
 logger = logging.getLogger(__name__)
+
+LOG_DIR = Path("logs")
+
+
+def _setup_logging(to_file: bool = False) -> None:
+    """ロギングを設定する。to_file=True でファイル出力も追加。"""
+    root = logging.getLogger()
+    root.setLevel(logging.INFO)
+    fmt = logging.Formatter(
+        "%(asctime)s [%(levelname)s] %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+
+    # コンソール出力
+    console = logging.StreamHandler()
+    console.setFormatter(fmt)
+    root.addHandler(console)
+
+    if to_file:
+        LOG_DIR.mkdir(exist_ok=True)
+        file_handler = logging.handlers.RotatingFileHandler(
+            LOG_DIR / "scheduler.log",
+            maxBytes=5 * 1024 * 1024,  # 5MB
+            backupCount=3,
+            encoding="utf-8",
+        )
+        file_handler.setFormatter(fmt)
+        root.addHandler(file_handler)
+
+
+def _safe_run_pipeline(notify_method: str, dry_run: bool = False, output_only: bool = False) -> None:
+    """_run_pipeline を例外安全にラップする。スケジューラーモード用。"""
+    start = datetime.now()
+    logger.info("===== パイプライン実行開始 =====")
+    try:
+        _run_pipeline(notify_method, dry_run=dry_run, output_only=output_only)
+        elapsed = (datetime.now() - start).total_seconds()
+        logger.info("===== パイプライン実行完了（%.1f秒） =====", elapsed)
+    except Exception:
+        elapsed = (datetime.now() - start).total_seconds()
+        logger.error(
+            "===== パイプライン実行失敗（%.1f秒） =====\n%s",
+            elapsed,
+            traceback.format_exc(),
+        )
 
 
 def _run_pipeline(notify_method: str, dry_run: bool = False, output_only: bool = False) -> None:
@@ -120,32 +164,49 @@ def main() -> None:
     notify_method = args.notify or NOTIFICATION_METHOD
 
     if args.schedule:
-        # スケジュールモード: 常駐プロセスとして定期実行
+        # スケジュールモード: ファイルログ有効化
+        _setup_logging(to_file=True)
+        logger.info("スケジューラー起動")
+
+        # スケジュール登録（例外安全ラッパー経由）
         for t in args.schedule:
             schedule.every().day.at(t).do(
-                _run_pipeline, notify_method=notify_method,
+                _safe_run_pipeline, notify_method=notify_method,
                 dry_run=args.dry_run, output_only=args.output_only,
             )
-            print(f"⏰ 毎日 {t} に実行予定を登録しました")
+            logger.info("毎日 %s に実行予定を登録", t)
 
         print(f"\n🟢 スケジューラー起動中（Ctrl+C で停止）")
+        print(f"   ログ出力先: {LOG_DIR / 'scheduler.log'}")
         next_run = schedule.next_run()
         if next_run:
             print(f"   次回実行: {next_run.strftime('%Y-%m-%d %H:%M')}")
 
         # Ctrl+C でグレースフルに停止
         def _handle_signal(signum, frame):
+            logger.info("スケジューラー停止（シグナル: %s）", signum)
             print("\n\n🔴 スケジューラーを停止しました")
             sys.exit(0)
 
         signal.signal(signal.SIGINT, _handle_signal)
         signal.signal(signal.SIGTERM, _handle_signal)
 
+        # ハートビート用カウンタ（30秒sleep × 60回 = 30分）
+        heartbeat_counter = 0
+        HEARTBEAT_INTERVAL = 60  # 30秒 × 60 = 30分
+
         while True:
             schedule.run_pending()
             time.sleep(30)
+            heartbeat_counter += 1
+            if heartbeat_counter >= HEARTBEAT_INTERVAL:
+                heartbeat_counter = 0
+                next_run = schedule.next_run()
+                next_str = next_run.strftime('%Y-%m-%d %H:%M') if next_run else "なし"
+                logger.info("ハートビート: スケジューラー稼働中 | 次回実行: %s", next_str)
     else:
         # 即時実行モード（従来動作）
+        _setup_logging(to_file=False)
         _run_pipeline(notify_method, dry_run=args.dry_run, output_only=args.output_only)
 
 
